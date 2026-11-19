@@ -12,8 +12,7 @@ int emplacement(char c, char *s){
     return -1;
 }
 
-/* Premier et Suivant de chaque non-terminal (meme ordre que "EeTtFfP") */
-char *premier[] = { "(ab", "+",   "(ab",  "(ab",  "(ab",    "*",      "(ab" };
+/* Suivant de chaque non-terminal (meme ordre que "EeTtFfP") */
 char *suivant[] = { ")$",  ")$",  "+)$",  "+)$",  "(ab+)$", "(ab+)$", "*(ab+)$" };
 int nb_erreurs;
 
@@ -97,18 +96,15 @@ int analyse(char *mot){
 
             r = M[ligne][colonne];
 
-            if (r == 0) {                       /* MODE PANIQUE */
+            if (r == 0) {                      
                 nb_erreurs++;
-                printf("ERREUR : case vide -> on saute des caracteres\n");
-                /* on elimine les lettres jusqu'a en trouver une de Premier(X) ou de Suivant(X) */
-                while (a != '$' && emplacement(a, premier[ligne]) == -1
-                                && emplacement(a, suivant[ligne]) == -1) {
-                    ptr++;
+                printf("ERREUR : case vide\n");
+                while (a != '$' && emplacement(a, suivant[ligne]) == -1) {
+                    ptr++;                      
                     a = mot[ptr];
                 }
-                if (emplacement(a, premier[ligne]) == -1)
-                    depiler();                  /* a est dans Suivant(X) : on abandonne X */
-                continue;                       /* sinon on garde X et on recommence */
+                depiler();                      
+                continue;
             }
 
             printf("%s\n", regle[r]);
@@ -157,8 +153,8 @@ int main(void){
                 mot[n++] = ligne[i];
         if (n == 0) continue;
         mot[n] = '\0';
-        printf("\nAnalyse de : %s\n", mot);       /* on affiche le mot avant d'ajouter le $ */
-        mot[n] = '$';                               /* le mot est termine par $ */
+        printf("\nAnalyse de : %s\n", mot);       
+        mot[n] = '$';                              
         mot[n + 1] = '\0';
 
         if (analyse(mot)) printf("=> le mot est accepte\n\n");
