@@ -4,7 +4,6 @@
 char non_terminaux[] = "EeTtFfP"; 
 char terminaux[] = "+*()ab$"; 
 
-//emplacement d un caractere dans une chaine
 int emplacement(char c, char *s){
     int i;
     for (i = 0; s[i] != '\0'; i++)
@@ -12,7 +11,6 @@ int emplacement(char c, char *s){
     return -1;
 }
 
-/* Suivant de chaque non-terminal (meme ordre que "EeTtFfP") */
 char *suivant[] = { ")$",  ")$",  "+)$",  "+)$",  "(ab+)$", "(ab+)$", "*(ab+)$" };
 int nb_erreurs;
 
@@ -90,7 +88,7 @@ int analyse(char *mot){
             colonne = emplacement(a, terminaux);
 
             if (colonne == -1) { 
-                printf("ERREUR : caractere '%c' inconnu\n", a); 
+                printf("ERREUR : caractere inconnu\n"); 
                 return 0; 
             }
 
@@ -98,7 +96,7 @@ int analyse(char *mot){
 
             if (r == 0) {                      
                 nb_erreurs++;
-                printf("ERREUR : case vide\n");
+                printf("ERREUR\n");
                 while (a != '$' && emplacement(a, suivant[ligne]) == -1) {
                     ptr++;                      
                     a = mot[ptr];
@@ -120,7 +118,7 @@ int analyse(char *mot){
                 printf("FIN : %d erreur(s)\n", nb_erreurs);
                 return 0;
             }
-            printf("ERREUR : caracteres en trop a la fin\n");
+            printf("ERREUR\n");
             return 0;
         }
 
@@ -130,9 +128,9 @@ int analyse(char *mot){
                 depiler();
                 ptr++;
             }
-            else{                               /* MODE PANIQUE : terminal attendu absent */
+            else{                               
                 nb_erreurs++;
-                printf("ERREUR : on attendait '%c' -> on le considere comme ajoute\n", X);
+                printf("ERREUR\n");
                 depiler();
             }
         }
@@ -140,13 +138,19 @@ int analyse(char *mot){
     }
 }
 
-int main(void){
+int main(int argc, char *argv[]){
     char ligne[200], mot[200];
     int i, n;
+    char *nom_fichier = (argc > 1) ? argv[1] : "test.txt";
+    FILE *f = fopen(nom_fichier, "r");
 
-    printf("Ecrire une expression reguliere sur {a,b} :\n");
+    if (f == NULL) {
+        printf("Impossible d'ouvrir le fichier %s\n", nom_fichier);
+        return 1;
+    }
+    printf("Analyse des exemples du fichier %s :\n", nom_fichier);
 
-    while(fgets(ligne, sizeof ligne, stdin) != NULL){
+    while(fgets(ligne, sizeof ligne, f) != NULL){
         n = 0;
         for (i = 0; ligne[i] != '\0'; i++)
             if (ligne[i] != ' ' && ligne[i] != '\t' && ligne[i] != '\n' && ligne[i] != '\r')
@@ -160,5 +164,6 @@ int main(void){
         if (analyse(mot)) printf("=> le mot est accepte\n\n");
         else printf("=> le mot est refuse\n\n");
     }
+    fclose(f);
     return 0;
 }
